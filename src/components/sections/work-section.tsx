@@ -1,7 +1,55 @@
 import { useReveal } from "@/hooks/use-reveal"
+import { MagneticButton } from "@/components/magnetic-button"
+import Icon from "@/components/ui/icon"
+
+const SUBJECT_COLORS: Record<string, string> = {
+  Математика: "from-blue-500/20 to-blue-600/10",
+  Физика: "from-purple-500/20 to-purple-600/10",
+  Информатика: "from-cyan-500/20 to-cyan-600/10",
+  Химия: "from-green-500/20 to-green-600/10",
+  История: "from-orange-500/20 to-orange-600/10",
+}
+
+const SUBJECT_ICONS: Record<string, string> = {
+  Математика: "Calculator",
+  Физика: "Atom",
+  Информатика: "Monitor",
+  Химия: "FlaskConical",
+  История: "Scroll",
+}
 
 export function WorkSection() {
   const { ref, isVisible } = useReveal(0.3)
+
+  const courses = [
+    {
+      title: "Алгебра: от основ до ЕГЭ",
+      subject: "Математика",
+      grade: "9–11 класс",
+      level: "Продвинутый",
+      topics: 42,
+      author: "Автор курса",
+      direction: "top",
+    },
+    {
+      title: "Механика и динамика",
+      subject: "Физика",
+      grade: "10 класс",
+      level: "Средний",
+      topics: 28,
+      author: "Автор курса",
+      direction: "right",
+    },
+    {
+      title: "Основы программирования",
+      subject: "Информатика",
+      grade: "8–9 класс",
+      level: "Начальный",
+      topics: 35,
+      author: "Автор курса",
+      direction: "left",
+    },
+  ]
 
   return (
     <section
@@ -10,41 +58,24 @@ export function WorkSection() {
     >
       <div className="mx-auto w-full max-w-7xl">
         <div
-          className={`mb-12 transition-all duration-700 md:mb-16 ${
+          className={`mb-10 flex items-end justify-between transition-all duration-700 md:mb-14 ${
             isVisible ? "translate-x-0 opacity-100" : "-translate-x-12 opacity-0"
           }`}
         >
-          <h2 className="mb-2 font-sans text-5xl font-light tracking-tight text-foreground md:text-6xl lg:text-7xl">
-            Курсы
-          </h2>
-          <p className="font-mono text-sm text-foreground/60 md:text-base">/ Популярные направления</p>
+          <div>
+            <h2 className="mb-2 font-sans text-5xl font-light tracking-tight text-foreground md:text-6xl lg:text-7xl">
+              Курсы
+            </h2>
+            <p className="font-mono text-sm text-foreground/60 md:text-base">/ Популярные направления</p>
+          </div>
+          <MagneticButton variant="secondary" size="lg" onClick={() => (window.location.href = "/catalog")}>
+            Все курсы
+          </MagneticButton>
         </div>
 
-        <div className="space-y-6 md:space-y-8">
-          {[
-            {
-              number: "01",
-              title: "Математика",
-              category: "5–11 класс · Алгебра, Геометрия, Статистика",
-              year: "42 темы",
-              direction: "left",
-            },
-            {
-              number: "02",
-              title: "Физика",
-              category: "7–11 класс · Механика, Электричество, Оптика",
-              year: "35 тем",
-              direction: "right",
-            },
-            {
-              number: "03",
-              title: "Информатика",
-              category: "8–11 класс · Алгоритмы, Программирование, БД",
-              year: "28 тем",
-              direction: "left",
-            },
-          ].map((project, i) => (
-            <ProjectCard key={i} project={project} index={i} isVisible={isVisible} />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
+          {courses.map((course, i) => (
+            <CourseCard key={i} course={course} index={i} isVisible={isVisible} />
           ))}
         </div>
       </div>
@@ -52,43 +83,80 @@ export function WorkSection() {
   )
 }
 
-function ProjectCard({
-  project,
+function CourseCard({
+  course,
   index,
   isVisible,
 }: {
-  project: { number: string; title: string; category: string; year: string; direction: string }
+  course: {
+    title: string
+    subject: string
+    grade: string
+    level: string
+    topics: number
+    author: string
+    direction: string
+  }
   index: number
   isVisible: boolean
 }) {
   const getRevealClass = () => {
     if (!isVisible) {
-      return project.direction === "left" ? "-translate-x-16 opacity-0" : "translate-x-16 opacity-0"
+      switch (course.direction) {
+        case "left":
+          return "-translate-x-12 opacity-0"
+        case "right":
+          return "translate-x-12 opacity-0"
+        default:
+          return "-translate-y-12 opacity-0"
+      }
     }
-    return "translate-x-0 opacity-100"
+    return "translate-x-0 translate-y-0 opacity-100"
   }
+
+  const gradientClass = SUBJECT_COLORS[course.subject] || "from-foreground/10 to-foreground/5"
+  const iconName = SUBJECT_ICONS[course.subject] || "BookOpen"
+
+  const levelColor =
+    course.level === "Начальный"
+      ? "bg-green-500/20 text-green-300"
+      : course.level === "Средний"
+        ? "bg-yellow-500/20 text-yellow-300"
+        : "bg-red-500/20 text-red-300"
 
   return (
     <div
-      className={`group flex items-center justify-between border-b border-foreground/10 py-6 transition-all duration-700 hover:border-foreground/20 md:py-8 ${getRevealClass()}`}
-      style={{
-        transitionDelay: `${index * 150}ms`,
-        marginLeft: index % 2 === 0 ? "0" : "auto",
-        maxWidth: index % 2 === 0 ? "85%" : "90%",
-      }}
+      className={`group relative overflow-hidden rounded-2xl border border-foreground/10 bg-foreground/5 backdrop-blur-sm transition-all duration-700 hover:border-foreground/20 hover:bg-foreground/10 ${getRevealClass()}`}
+      style={{ transitionDelay: `${index * 120}ms` }}
     >
-      <div className="flex items-baseline gap-4 md:gap-8">
-        <span className="font-mono text-sm text-foreground/30 transition-colors group-hover:text-foreground/50 md:text-base">
-          {project.number}
-        </span>
-        <div>
-          <h3 className="mb-1 font-sans text-2xl font-light text-foreground transition-transform duration-300 group-hover:translate-x-2 md:text-3xl lg:text-4xl">
-            {project.title}
-          </h3>
-          <p className="font-mono text-xs text-foreground/50 md:text-sm">{project.category}</p>
+      {/* gradient top strip */}
+      <div className={`h-1.5 w-full bg-gradient-to-r ${gradientClass}`} />
+
+      <div className="p-5 md:p-6">
+        {/* Subject badge + grade */}
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 rounded-full bg-foreground/10 px-3 py-1">
+            <Icon name={iconName as "BookOpen"} size={12} className="text-foreground/70" />
+            <span className="font-mono text-xs text-foreground/70">{course.subject}</span>
+          </div>
+          <span className="font-mono text-xs text-foreground/40">{course.grade}</span>
+        </div>
+
+        {/* Title */}
+        <h3 className="mb-1 font-sans text-lg font-light leading-snug text-foreground transition-transform duration-300 group-hover:translate-x-1 md:text-xl">
+          {course.title}
+        </h3>
+        <p className="mb-4 font-mono text-xs text-foreground/40">{course.author}</p>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-1 font-mono text-xs text-foreground/50">
+            <Icon name="BookMarked" size={12} />
+            {course.topics} тем
+          </span>
+          <span className={`rounded-full px-2.5 py-0.5 font-mono text-xs ${levelColor}`}>{course.level}</span>
         </div>
       </div>
-      <span className="font-mono text-xs text-foreground/30 md:text-sm">{project.year}</span>
     </div>
   )
 }
